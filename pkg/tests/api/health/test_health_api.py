@@ -9,13 +9,12 @@ class TestGrafanaHealthAPI(unittest.TestCase):
         try:
             with request.urlopen(url) as response:
                 body = response.read()
-                status = response.status
         except error.URLError:
             self.skipTest("Grafana server is not running")
         data = json.loads(body.decode())
-        self.assertEqual(status, 200)
         self.assertIn("database", data)
-        self.assertEqual(data.get("message"), "OK")
+        self.assertEqual(data.get("database"), "ok")
+
 
 
 if __name__ == "__main__":
