@@ -55,24 +55,25 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
 
-    - name: Install Chrome and matching ChromeDriver
+    - name: Install latest Chrome & matching ChromeDriver
       run: |
         sudo apt-get update
-        sudo apt-get install -y unzip wget curl gnupg
+        sudo apt-get install -y wget unzip curl gnupg
 
-        # Install latest Chrome
+        # Install latest stable Chrome
         wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
-        sudo apt install -y ./google-chrome-stable_current_amd64.deb
+        sudo dpkg -i google-chrome-stable_current_amd64.deb || sudo apt-get -f install -y
 
-        # Get Chrome version
-        CHROME_VERSION=$(google-chrome --version | grep -oP '\d+\.\d+\.\d+' | head -1)
+        # Get Chrome major version
+        CHROME_VERSION=$(google-chrome --version | grep -oP '\d+' | head -1)
 
-        # Install matching ChromeDriver
-        CHROMEDRIVER_VERSION=$(curl -s "https://googlechromelabs.github.io/chrome-for-testing/LATEST_RELEASE_$CHROME_VERSION")
-        wget "https://edgedl.me.gvt1.com/edgedl/chrome/chrome-for-testing/$CHROMEDRIVER_VERSION/linux64/chromedriver-linux64.zip"
-        unzip chromedriver-linux64.zip
-        sudo mv chromedriver-linux64/chromedriver /usr/local/bin/chromedriver
+        # Download matching ChromeDriver
+        DRIVER_URL=$(curl -s https://googlechromelabs.github.io/chrome-for-testing/last-known-good-versions-with-downloads.json | jq -r ".channels.Stable.downloads.chromedriver[] | select(.platform == \"linux64\") | .url")
+        wget "$DRIVER_URL" -O chromedriver.zip
+        unzip chromedriver.zip
+        sudo mv chromedriver-linux64/chromedriver /usr/local/bin/
         sudo chmod +x /usr/local/bin/chromedriver
+
 
 
     - name: Run Selenium tests
