@@ -65,7 +65,7 @@ jobs:
         sudo dpkg -i google-chrome-stable_current_amd64.deb || sudo apt-get -f install -y
 
         # Get Chrome major version
-        CHROME_VERSION=$(google-chrome --version | grep -oP '\d+' | head -1)
+        CHROME_VERSION=$(google-chrome --version | grep -oP '\d+\.\d+\.\d+' | head -1)
 
         # Download matching ChromeDriver
         DRIVER_URL=$(curl -s https://googlechromelabs.github.io/chrome-for-testing/last-known-good-versions-with-downloads.json | jq -r ".channels.Stable.downloads.chromedriver[] | select(.platform == \"linux64\") | .url")
