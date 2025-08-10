@@ -33,7 +33,7 @@ jobs:
       ENVIRONMENT: ${{ github.event.inputs.environment || 'staging' }}
       BROWSER: ${{ github.event.inputs.browser || 'chrome' }}
       HEADLESS: "true"
-      GRAFANA_URL: 'http://<REPLACE_WITH_EC2_PUBLIC_IP>:3000'  # 🔧 Replace this IP manually
+      GRAFANA_URL: 'http://108.129.179.249:3000'  # 🔧 Replace this IP manually
 
     steps:
     - name: Checkout UI testing repo
@@ -48,13 +48,6 @@ jobs:
       with:
         python-version: '3.12.6'
 
-    - name: Cache pip dependencies
-      uses: actions/cache@v4
-      with:
-        path: ~/.cache/pip
-        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
-        restore-keys: |
-          ${{ runner.os }}-pip-
 
     - name: Install Python dependencies
       run: |
