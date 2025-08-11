@@ -69,6 +69,11 @@ jobs:
         unzip chromedriver.zip
         sudo mv chromedriver-linux64/chromedriver /usr/local/bin/
         sudo chmod +x /usr/local/bin/chromedriver
+      
+    - name: Kill Chrome & clean locks
+      run: |
+        pkill -f chrome || true
+        rm -rf /tmp/Singleton* /tmp/.org.chromium*
 
     - name: Run Selenium tests
       run: |
