@@ -65,7 +65,7 @@ Exactly what changes should be added to the changelog is hard to answer but here
 - It's better to err on the side of inclusion. Introducing an unnecessary or duplicate change in the changelog is better than leaving out a change.
 - Always keep the guidelines in [Format the pull request title](#format-the-pull-request-title) in mind.
 
-An active decision to include a change in the changelog needs to be taken for every pull request. There's a pull request check named **Changelog Check** that enforces this rule. By adding or removing labels on the pull request or updating the pull request title, description, or both, the check is re-evaluated.
+An active decision to include a change in the changelog needs to be taken for every pull request. You can add or remove labels on the pull request or update the pull request title and description to reflect whether it should be included.
 
 #### Skip changelog
 
@@ -78,7 +78,7 @@ To include a pull request in the changelog, add a label named `add to changelog`
 - The title must be formatted according to [Format the pull request title](#format-the-pull-request-title)
 - The description must include a breaking change notice if the change is labeled to be a breaking change. Refer to [Breaking changes](#breaking-changes) below for more information.
 
-Not complying with above rules can make the **Changelog Check** fail with validation errors.
+Not complying with above rules can lead to inconsistencies in the changelog.
 
 The changelog is divided into various sections. Here's how to make a description of a pull request show up in a certain section of the release notes:
 
