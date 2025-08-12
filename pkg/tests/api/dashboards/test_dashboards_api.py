@@ -3,6 +3,48 @@ import os, time, uuid, pytest, requests
 BASE_URL = os.getenv("API_BASE_URL", "http://34.254.113.76:3000")
 AUTH = (os.getenv("GRAFANA_USER", "admin"), os.getenv("GRAFANA_PASS", "admin"))
 
+# --- Tests ---
+
+def test_create_dashboard_succeeds(s):
+    r = save_dashboard(s, title=f"py just testing {uuid.uuid4().hex[:6]}")
+    assert r.status_code == 200, r.text
+    body = r.json()
+    assert body.get("id") and body.get("uid")
+
+def test_create_dashboard_in_folder_succeeds(s):
+    folder = create_folder(s, f"py folder {uuid.uuid4().hex[:5]}")
+    r = save_dashboard(s, title="in folder", folder_uid=folder["uid"])
+    assert r.status_code == 200, r.text
+    body = r.json()
+    assert body.get("folderUid") == folder["uid"]
+
+def test_create_dashboard_unknown_folder_fails_400(s):
+    r = save_dashboard(s, title="bad folder", folder_uid="unknown")
+    assert r.status_code == 400, r.text
+    assert "message" in r.json()
+
+@pytest.mark.parametrize("schema_version", [1, 36, 40, None])
+def test_schema_version_preserved_on_save_and_get(s, schema_version):
+    # save
+    dash = {"title": "Schema Version Test"}
+    if schema_version is not None:
+        dash["schemaVersion"] = schema_version
+    r = s.post(f"{BASE_URL}/api/dashboards/db", json={"dashboard": dash})
+    assert r.status_code == 200, r.text
+    uid = r.json()["uid"]
+    # get
+    r2 = get_dashboard_by_uid(s, uid)
+    assert r2.status_code == 200, r2.text
+    saved = r2.json()["dashboard"]
+    actual = saved.get("schemaVersion")
+    if schema_version is None:
+        # Expect not auto-filled (may be missing or non-int)
+        assert actual in (None, saved.get("schemaVersion")), f"Unexpected schemaVersion: {actual}"
+    else:
+        assert int(actual) == schema_version
+
+# ____UTILS____
+
 def wait_for_grafana(url=BASE_URL, timeout=90):
     end = time.time() + timeout
     while time.time() < end:
@@ -43,43 +85,3 @@ def save_dashboard(sess, *, title=None, uid=None, id_=None, folder_uid=None, ver
 
 def get_dashboard_by_uid(sess, uid):
     return sess.get(f"{BASE_URL}/api/dashboards/uid/{uid}")
-
-# --- Tests ---
-
-def test_create_dashboard_succeeds(s):
-    r = save_dashboard(s, title=f"py just testing {uuid.uuid4().hex[:6]}")
-    assert r.status_code == 200, r.text
-    body = r.json()
-    assert body.get("id") and body.get("uid")
-
-def test_create_dashboard_in_folder_succeeds(s):
-    folder = create_folder(s, f"py folder {uuid.uuid4().hex[:5]}")
-    r = save_dashboard(s, title="in folder", folder_uid=folder["uid"])
-    assert r.status_code == 200, r.text
-    body = r.json()
-    assert body.get("folderUid") == folder["uid"]
-
-def test_create_dashboard_unknown_folder_fails_400(s):
-    r = save_dashboard(s, title="bad folder", folder_uid="unknown")
-    assert r.status_code == 400, r.text
-    assert "message" in r.json()
-
-@pytest.mark.parametrize("schema_version", [1, 36, 40, None])
-def test_schema_version_preserved_on_save_and_get(s, schema_version):
-    # save
-    dash = {"title": "Schema Version Test"}
-    if schema_version is not None:
-        dash["schemaVersion"] = schema_version
-    r = s.post(f"{BASE_URL}/api/dashboards/db", json={"dashboard": dash})
-    assert r.status_code == 200, r.text
-    uid = r.json()["uid"]
-    # get
-    r2 = get_dashboard_by_uid(s, uid)
-    assert r2.status_code == 200, r2.text
-    saved = r2.json()["dashboard"]
-    actual = saved.get("schemaVersion")
-    if schema_version is None:
-        # Expect not auto-filled (may be missing or non-int)
-        assert actual in (None, saved.get("schemaVersion")), f"Unexpected schemaVersion: {actual}"
-    else:
-        assert int(actual) == schema_version
