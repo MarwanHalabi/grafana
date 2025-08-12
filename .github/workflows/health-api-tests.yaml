@@ -15,28 +15,14 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Python
-        uses: actions/setup-python@v5
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
-          cache: 'pip'
-
+          python-version: '3.12.6'
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          if [ -f requirements.txt ]; then
-            pip install -r requirements.txt
-          elif [ -f pkg/tests/api/health/requirements.txt ]; then
-            pip install -r pkg/tests/api/health/requirements.txt
-          else
-            pip install pytest requests
-          fi
-
+          pip install pytest
       - name: Run tests
-        run: |
-          python -m pytest -q pkg/tests/api/health \
-            --maxfail=1 \
-            --junitxml=report.xml
+        run: pytest pkg/tests/api/health/health.py
+        
