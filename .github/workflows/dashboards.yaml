@@ -66,4 +66,4 @@ jobs:
 
       - name: Run Dashboards API tests
         run: |
-          pytest -q pkg/tests/api/dashboards -rs --maxfail=1 --junitxml=report.xml
+          pytest pkg/tests/api/dashboards

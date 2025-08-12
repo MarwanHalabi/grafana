@@ -1,6 +1,6 @@
 import os, time, uuid, pytest, requests
 
-BASE_URL = os.getenv("API_BASE_URL", "http://localhost:3000")
+BASE_URL = os.getenv("API_BASE_URL", "http://34.254.113.76:3000")
 AUTH = (os.getenv("GRAFANA_USER", "admin"), os.getenv("GRAFANA_PASS", "admin"))
 
 def wait_for_grafana(url=BASE_URL, timeout=90):
