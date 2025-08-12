@@ -2,14 +2,9 @@
 name: Health API Tests
 
 on:
-  push:
-    paths:
-      - 'pkg/tests/api/health/**'
-      - '.github/workflows/health-api-tests.yaml'
   pull_request:
-    paths:
-      - 'pkg/tests/api/health/**'
-      - '.github/workflows/health-api-tests.yaml'
+    branches:
+      - main
 
 jobs:
   test:

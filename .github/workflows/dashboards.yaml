@@ -2,14 +2,9 @@
 name: Dashboards API Tests
 
 on:
-  push:
-    paths:
-      - "pkg/tests/api/dashboards/**"
-      - ".github/workflows/dashboards-api-tests.yaml"
   pull_request:
-    paths:
-      - "pkg/tests/api/dashboards/**"
-      - ".github/workflows/dashboards-api-tests.yaml"
+    branches:
+      - main
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
