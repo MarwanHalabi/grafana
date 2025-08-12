@@ -1,4 +1,5 @@
 # .github/workflows/ui-testing.yaml
+# This workflow runs Selenium UI tests on pull requests to the main branch.
 name: Selenium UI Tests
 
 on:
