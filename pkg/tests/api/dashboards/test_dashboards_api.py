@@ -3,7 +3,7 @@ import os, time, uuid, pytest, requests
 BASE_URL = os.getenv("API_BASE_URL", "http://54.154.221.226:3000")
 AUTH = (os.getenv("GRAFANA_USER", "admin"), os.getenv("GRAFANA_PASS", "admin"))
 
-# --- Tests ---
+# --- CREATE / READ tests ---
 
 def test_create_dashboard_succeeds(s):
     r = save_dashboard(s, title=f"py just testing {uuid.uuid4().hex[:6]}")
@@ -43,6 +43,52 @@ def test_schema_version_preserved_on_save_and_get(s, schema_version):
     else:
         assert int(actual) == schema_version
 
+# --- UPDATE tests ---
+
+def test_update_dashboard_title_succeeds(s):
+    # Create
+    create = save_dashboard(s, title=f"to-update {uuid.uuid4().hex[:6]}")
+    assert create.status_code == 200, create.text
+    uid = create.json()["uid"]
+
+    # Read current version
+    r_get = get_dashboard_by_uid(s, uid)
+    assert r_get.status_code == 200, r_get.text
+    dash = r_get.json()["dashboard"]
+    cur_ver = dash.get("version", 1)
+
+    # Update title (POST /api/dashboards/db with uid + version)
+    new_title = f"updated-title {uuid.uuid4().hex[:6]}"
+    upd = save_dashboard(s, uid=uid, version=cur_ver, title=new_title, overwrite=True)
+    assert upd.status_code == 200, upd.text
+
+    # Verify
+    r_check = get_dashboard_by_uid(s, uid)
+    assert r_check.status_code == 200, r_check.text
+    got_title = r_check.json()["dashboard"].get("title")
+    assert got_title == new_title
+
+# --- DELETE tests ---
+
+def test_delete_dashboard_succeeds(s):
+    # Create
+    create = save_dashboard(s, title=f"to-delete {uuid.uuid4().hex[:6]}")
+    assert create.status_code == 200, create.text
+    uid = create.json()["uid"]
+
+    # Delete
+    d = delete_dashboard_by_uid(s, uid)
+    assert d.status_code == 200, d.text
+
+    # Ensure it's gone
+    after = get_dashboard_by_uid(s, uid)  # use sess.get(...) as requested
+    assert after.status_code == 404, f"Expected 404 after delete, got {after.status_code}: {after.text}"
+
+def test_delete_nonexistent_dashboard_404(s):
+    bogus_uid = f"nope-{uuid.uuid4().hex[:12]}"
+    d = delete_dashboard_by_uid(s, bogus_uid)
+    assert d.status_code == 404, f"Expected 404, got {d.status_code}: {d.text}"
+
 # ____UTILS____
 
 def wait_for_grafana(url=BASE_URL, timeout=90):
@@ -52,7 +98,8 @@ def wait_for_grafana(url=BASE_URL, timeout=90):
             r = requests.get(f"{url}/api/health", timeout=3, auth=AUTH)
             if r.ok: return True
         except Exception:
-            time.sleep(2)
+            pass
+        time.sleep(2)
     return False
 
 @pytest.fixture(scope="session", autouse=True)
@@ -85,3 +132,6 @@ def save_dashboard(sess, *, title=None, uid=None, id_=None, folder_uid=None, ver
 
 def get_dashboard_by_uid(sess, uid):
     return sess.get(f"{BASE_URL}/api/dashboards/uid/{uid}")
+
+def delete_dashboard_by_uid(sess, uid):
+    return sess.delete(f"{BASE_URL}/api/dashboards/uid/{uid}")
