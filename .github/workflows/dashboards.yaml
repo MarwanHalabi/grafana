@@ -23,6 +23,11 @@ jobs:
           GF_SECURITY_ADMIN_USER: admin
           GF_SECURITY_ADMIN_PASSWORD: admin
         # No container healthcheck to avoid tool deps; we'll wait from the host.
+    
+    env:
+      API_BASE_URL: http://localhost:3000
+      GRAFANA_USER: admin
+      GRAFANA_PASS: admin
 
     steps:
       - name: Checkout
