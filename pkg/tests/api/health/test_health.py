@@ -5,7 +5,7 @@ from urllib import error, request
 
 class TestGrafanaHealthAPI(unittest.TestCase):
     def test_health_endpoint(self):
-        url = "http://34.254.113.76:3000/api/health"
+        url = "http://54.154.221.226:3000/api/health"
         try:
             with request.urlopen(url) as response:
                 body = response.read()
