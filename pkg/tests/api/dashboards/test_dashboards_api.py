@@ -89,6 +89,39 @@ def test_delete_nonexistent_dashboard_404(s):
     d = delete_dashboard_by_uid(s, bogus_uid)
     assert d.status_code == 404, f"Expected 404, got {d.status_code}: {d.text}"
 
+# --- AUTH tests ---
+
+def test_auth_required_for_save_dashboard_no_auth():
+    """POST /api/dashboards/db without credentials should be denied (401/403)."""
+    sess = requests.Session()  # no auth
+    payload = {"dashboard": {"title": f"unauth save {uuid.uuid4().hex[:6]}"}}
+    r = sess.post(f"{BASE_URL}/api/dashboards/db", json=payload)
+    assert r.status_code in (401, 403), f"Expected 401/403, got {r.status_code}: {r.text}"
+
+def test_auth_required_for_delete_dashboard_no_auth(s):
+    """DELETE /api/dashboards/uid/:uid without credentials should be denied (401/403)."""
+    # Create with auth
+    create = save_dashboard(s, title=f"del-unauth {uuid.uuid4().hex[:6]}")
+    assert create.status_code == 200, create.text
+    uid = create.json()["uid"]
+
+    # Try delete without auth
+    sess = requests.Session()  # no auth
+    d = sess.delete(f"{BASE_URL}/api/dashboards/uid/{uid}")
+    assert d.status_code in (401, 403), f"Expected 401/403, got {d.status_code}: {d.text}"
+
+    # Cleanup with auth
+    cleanup = delete_dashboard_by_uid(s, uid)
+    assert cleanup.status_code == 200, cleanup.text
+
+def test_auth_with_bad_credentials_denied():
+    """Using wrong basic auth should be denied (401/403) on save."""
+    sess = requests.Session()
+    sess.auth = ("wrong", "creds")
+    payload = {"dashboard": {"title": f"bad-auth {uuid.uuid4().hex[:6]}"}}
+    r = sess.post(f"{BASE_URL}/api/dashboards/db", json=payload)
+    assert r.status_code in (401, 403), f"Expected 401/403, got {r.status_code}: {r.text}"
+
 # ____UTILS____
 
 def wait_for_grafana(url=BASE_URL, timeout=90):
