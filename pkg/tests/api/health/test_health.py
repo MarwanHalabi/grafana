@@ -2,7 +2,7 @@ import os, json, unittest
 from urllib import request, error
 from base64 import b64encode
 
-API_BASE_URL = os.getenv("API_BASE_URL", "http://34.244.73.51:3000")
+API_BASE_URL = os.getenv("API_BASE_URL", "http://54.195.151.217:3000")
 GRAFANA_USER = os.getenv("admin")
 GRAFANA_PASS = os.getenv("admin")
 

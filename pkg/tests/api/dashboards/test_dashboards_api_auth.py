@@ -1,7 +1,7 @@
 
 import os, time, uuid, pytest, requests
 
-BASE_URL = os.getenv("API_BASE_URL", "http://34.244.73.51:3000")
+BASE_URL = os.getenv("API_BASE_URL", "http://54.195.151.217:3000")
 AUTH = (os.getenv("GRAFANA_USER", "admin"), os.getenv("GRAFANA_PASS", "admin"))
 def test_auth_required_for_save_dashboard_no_auth():
     """POST /api/dashboards/db without credentials should be denied (401/403)."""

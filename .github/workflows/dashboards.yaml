@@ -25,7 +25,7 @@ jobs:
         # No container healthcheck to avoid tool deps; we'll wait from the host.
     
     env:
-      API_BASE_URL: http://34.244.73.51:3000
+      API_BASE_URL: http://54.195.151.217:3000
       GRAFANA_USER: admin
       GRAFANA_PASS: admin
 

@@ -1,6 +1,6 @@
 import os, time, uuid, pytest, requests
 
-BASE_URL = os.getenv("API_BASE_URL", "http://34.244.73.51:3000")
+BASE_URL = os.getenv("API_BASE_URL", "http://54.195.151.217:3000")
 AUTH = (os.getenv("GRAFANA_USER", "admin"), os.getenv("GRAFANA_PASS", "admin"))
 
 # --- CREATE / READ tests ---
